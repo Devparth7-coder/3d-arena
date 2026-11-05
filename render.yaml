@@ -1,0 +1,27 @@
+# Render Blueprint — deploys the ARENA client as a static site.
+# Phase 7 will extend this file with the game server (Node + Socket.IO web service)
+# and a managed PostgreSQL instance.
+services:
+  - type: web
+    name: arena-client
+    runtime: static
+    buildCommand: npm run build
+    outputDir: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.20.2
+    # SPA fallback (harmless today — the app has no client routes yet)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /models/*
+        name: Cache-Control
+        value: public, max-age=86400, stale-while-revalidate=604800
+      - path: /fonts/*
+        name: Cache-Control
+        value: public, max-age=604800, stale-while-revalidate=2592000
